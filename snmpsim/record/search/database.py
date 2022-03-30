@@ -7,6 +7,7 @@
 
 import os
 import sys
+import fcntl
 
 from snmpsim import confdir
 from snmpsim import error
@@ -60,8 +61,19 @@ class RecordIndex(object):
                 self.close()
 
         if not self.is_open():
+
+            # TODO: There should be a better way/place to do this
+            #  but for now this will do
+
+            # Lock file
+            f = open(self._text_file, "r")
+            fcntl.flock(f, fcntl.LOCK_SH)
+
             self.create()
             self.open()
+
+            # Unlock file
+            f.close()
 
         return self._text, self._db
 
